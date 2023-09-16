@@ -30,3 +30,6 @@ var URLPaths structures.URLPathsStructure = structures.URLPathsStructure{
 	HomePage: "/",
 	StaticFiles: "/static/",
 }
+
+var LogDir string = "tmp/logs/"
+var LogPath string = LogDir + "log_file"

@@ -4,6 +4,7 @@ use (
 	./cmd/app
 	./internal/app
 	./internal/config
+	./internal/logging
 	./internal/routes_handle_functions
 	./internal/structures
 )
