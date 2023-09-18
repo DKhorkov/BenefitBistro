@@ -37,7 +37,6 @@ func create_log_path_if_not_exists() {
 	}
 }
 
-
 func LogTemplateExecuteError(template_name string, err error) {
 	Log.Printf("An error occured during trying to execute \"%s\" template: %v\n", template_name, err)
 }

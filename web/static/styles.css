@@ -1,8 +1,9 @@
 h1 {
   font-size: 20px;
-  color: red;
+  color: white;
+  text-align: center;
 }
 
 body {
-  background-color: blue;
+  background-color: black;
 }

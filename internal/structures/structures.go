@@ -1,15 +1,11 @@
 package structures
 
-import (
-	"net/http"
-)
-
-type RouteHandlersStructure struct {
-	HomePage func(http.ResponseWriter, *http.Request)
+type RouteHandlersInfoStructure struct {
+	HomePage, StaticFiles RouteInfoStructure
 }
 
-type RouteHandlersNamesStructure struct {
-	HomePage string
+type RouteInfoStructure struct {
+	TemplateName, URLPath string
 }
 
 type ServerParametersStructure struct {
@@ -17,7 +13,10 @@ type ServerParametersStructure struct {
 	Port string
 }
 
-type URLPathsStructure struct {
-	HomePage string
-	StaticFiles string
+type TemplateParamsStructure struct {
+	HomePage TemplateData
+}
+
+type TemplateData struct {
+	PageName string
 }

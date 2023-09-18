@@ -10,10 +10,13 @@ func Run() {
 	server := http.NewServeMux()
 
     // Подключаем обработку стилей для всех юрлов
-    server.Handle(config.URLPaths.StaticFiles, http.StripPrefix(config.URLPaths.StaticFiles, config.StaticFiles))
+    server.Handle(
+        config.RoutesHandlersInfo.StaticFiles.URLPath, 
+        http.StripPrefix(
+            config.RoutesHandlersInfo.StaticFiles.URLPath, config.StaticFiles))
 
     // Создаем обработку юрлов
-    server.HandleFunc(config.URLPaths.HomePage, routes_handle_functions.RouteHandlers.HomePage)
+    server.HandleFunc(config.RoutesHandlersInfo.HomePage.URLPath, routes_handle_functions.HomePageHandler)
 
     http.ListenAndServe(config.ServerParameters.Host + ":" + config.ServerParameters.Port, server)
 }
