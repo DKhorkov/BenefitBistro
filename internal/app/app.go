@@ -17,6 +17,9 @@ func Run() {
 
     // Создаем обработку юрлов
     server.HandleFunc(config.RoutesHandlersInfo.HomePage.URLPath, routes_handle_functions.HomePageHandler)
+    server.HandleFunc(
+        config.RoutesHandlersInfo.EmployeeRegister.URLPath, 
+        routes_handle_functions.EmployeeRegisterPageHandler)
 
     http.ListenAndServe(config.ServerParameters.Host + ":" + config.ServerParameters.Port, server)
 }

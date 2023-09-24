@@ -1,7 +1,7 @@
 package structures
 
 type RouteHandlersInfoStructure struct {
-	HomePage, StaticFiles RouteInfoStructure
+	StaticFiles, HomePage, EmployeeLogin, EmployeeRegister, HirerLogin, HirerRegister  RouteInfoStructure
 }
 
 type RouteInfoStructure struct {
@@ -14,7 +14,7 @@ type ServerParametersStructure struct {
 }
 
 type TemplateParamsStructure struct {
-	HomePage TemplateData
+	HomePage, EmployeeLogin, EmployeeRegister, HirerLogin, HirerRegister TemplateData
 }
 
 type TemplateData struct {

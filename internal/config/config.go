@@ -6,12 +6,14 @@ import (
 	"structures"
 )
 
+
 var template_files []string = []string{
 	"web/templates/header.html",
 	"web/templates/footer.html",
 	"web/templates/homepage.html",
+	"web/templates/headTags.html",
+	"web/templates/employeeRegister.html",
 }
-
 
 var static_files_dir string = "web/static/"
 var StaticFiles = http.FileServer(http.Dir(static_files_dir))
@@ -20,12 +22,16 @@ var StaticFiles = http.FileServer(http.Dir(static_files_dir))
 var Templates = template.Must(template.ParseFiles(template_files...))
 
 var RoutesHandlersInfo structures.RouteHandlersInfoStructure = structures.RouteHandlersInfoStructure{
+	StaticFiles: structures.RouteInfoStructure{
+		URLPath: "/static/",
+	},
 	HomePage: structures.RouteInfoStructure{
 		TemplateName: "homepage",
 		URLPath: "/",
 	},
-	StaticFiles: structures.RouteInfoStructure{
-		URLPath: "/static/",
+	EmployeeRegister: structures.RouteInfoStructure{
+		TemplateName: "employeeRegister",
+		URLPath: "/employeeRegister/",
 	},
 }
 
@@ -39,5 +45,8 @@ var LogPath string = LogDir + "log_file"
 var TemplatesParams structures.TemplateParamsStructure = structures.TemplateParamsStructure{
 	HomePage: structures.TemplateData{
 		PageName: "Главная страница",
+	},
+	EmployeeRegister: structures.TemplateData{
+		PageName: "Регистрация сотрудника",
 	},
 }

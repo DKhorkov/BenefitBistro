@@ -1,7 +1,16 @@
-{{ define "homepage" }} 
+{{ define "homepage" }}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>{{ .PageName }}</title>
+    {{ template "headTags" }}
+  </head>
+  <body>
+    {{ template "header" }}
 
-{{ template "header" }}
+    <h1>Here is HomePage</h1>
 
-<h1 style="margin-top: 20%;">Here is some fucking HomewPAge</h1>
-
-{{ template "footer" }} {{ end }}
+    {{ template "footer" }}
+  </body>
+</html>
+{{ end }}
