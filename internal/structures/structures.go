@@ -1,7 +1,13 @@
 package structures
 
 type RouteHandlersInfoStructure struct {
-	StaticFiles, HomePage, EmployeeLogin, EmployeeRegister, HirerLogin, HirerRegister  RouteInfoStructure
+	StaticFiles, 
+	HomePage, 
+	EmployeeLogin, 
+	EmployeeRegister, 
+	HirerLogin, 
+	HirerRegister, 
+	SaveEmployee RouteInfoStructure
 }
 
 type RouteInfoStructure struct {

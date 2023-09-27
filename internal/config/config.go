@@ -33,13 +33,18 @@ var RoutesHandlersInfo structures.RouteHandlersInfoStructure = structures.RouteH
 		TemplateName: "employeeRegister",
 		URLPath: "/employeeRegister/",
 	},
+	SaveEmployee: structures.RouteInfoStructure{
+		TemplateName: "saveEmployee",
+		URLPath: "/saveEmployee/",
+	},
 }
 
 var ServerParameters structures.ServerParametersStructure = structures.ServerParametersStructure{
 	Port: "8090",
 }
 
-var LogDir string = "tmp/logs/"
+var temporatyFolder string = "tmp/"
+var LogDir string = temporatyFolder + "logs/"
 var LogPath string = LogDir + "log_file"
 
 var TemplatesParams structures.TemplateParamsStructure = structures.TemplateParamsStructure{
@@ -50,3 +55,6 @@ var TemplatesParams structures.TemplateParamsStructure = structures.TemplatePara
 		PageName: "Регистрация сотрудника",
 	},
 }
+
+var DatabaseFolder string = temporatyFolder + "database/"
+var DatabaseName string = DatabaseFolder + "BenefitBistro.db"
