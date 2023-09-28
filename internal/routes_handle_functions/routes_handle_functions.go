@@ -1,10 +1,12 @@
 package routes_handle_functions
 
 import (
+	"net/http"
+
 	"config"
 	"db_adapter"
 	"logging"
-	"net/http"
+	"mycrypto"
 )
 
 func HomePageHandler(response http.ResponseWriter, request *http.Request) {
@@ -34,7 +36,6 @@ func EmployeeRegisterPageHandler(response http.ResponseWriter, request *http.Req
 }
 
 func SaveEmployeeHandler(response http.ResponseWriter, request *http.Request) {
-	logging.Log.Printf("saving employee %v\n", request)
 	db_adapter := db_adapter.DatabaseAdapter{}
 	err := db_adapter.OpenConnection()
 	if err != nil {
@@ -42,9 +43,16 @@ func SaveEmployeeHandler(response http.ResponseWriter, request *http.Request) {
 		http.Redirect(response, request, config.RoutesHandlersInfo.HomePage.TemplateName, http.StatusInternalServerError)
 	}
 
+	var encrypted_password string
+	encrypted_password, err = mycrypto.EncryptMessage(request.FormValue("password"))
+	if err != nil {
+		logging.LogTemplateExecuteError(config.RoutesHandlersInfo.SaveEmployee.TemplateName, err)
+		http.Redirect(response, request, config.RoutesHandlersInfo.HomePage.TemplateName, http.StatusInternalServerError)
+	}
+
 	err = db_adapter.SaveEmployee(
 		request.FormValue("username"), 
-		request.FormValue("password"))
+		encrypted_password)
 
 	if err != nil {
 		logging.LogTemplateExecuteError(config.RoutesHandlersInfo.SaveEmployee.TemplateName, err)

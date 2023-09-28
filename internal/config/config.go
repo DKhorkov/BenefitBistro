@@ -58,3 +58,6 @@ var TemplatesParams structures.TemplateParamsStructure = structures.TemplatePara
 
 var DatabaseFolder string = temporatyFolder + "database/"
 var DatabaseName string = DatabaseFolder + "BenefitBistro.db"
+
+// Следует хранить в окружении или скрыть в ином месте. Размер должен составлять 16, 24 или 32 байта.
+var CryptKey []byte = []byte("574d93e6298df2e83e5c6b4dc63ae928") 

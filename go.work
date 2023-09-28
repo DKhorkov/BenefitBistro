@@ -8,6 +8,7 @@ use (
 	./internal/database/models
 	./internal/helping_functions
 	./internal/logging
+	./internal/mycrypto
 	./internal/routes_handle_functions
 	./internal/structures
 )
