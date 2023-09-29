@@ -6,9 +6,13 @@
     {{ template "headTags" }}
   </head>
   <body>
-    {{ template "header" }}
+    {{ if .UserData.Authentificated }}
+     {{ template "authentificated_header" }} 
+    {{ else }}
+     {{ template "non_authentificated_header" }} 
+    {{ end }}
 
-    <h1>Here is HomePage</h1>
+    <h1>Here is HomePage, {{ .UserData.Username }}, {{ .UserData.Authentificated }}</h1>
 
     {{ template "footer" }}
   </body>

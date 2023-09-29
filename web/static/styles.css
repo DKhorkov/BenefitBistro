@@ -10,6 +10,10 @@ h1 {
   margin-right: 0%;
 }
 
-.register-button {
-  margin-left: 20%;
+.base-custom-button {
+  margin-left: -30%;
+}
+
+.login-button {
+  margin-left: 5%;
 }

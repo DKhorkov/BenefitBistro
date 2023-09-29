@@ -20,9 +20,20 @@ type ServerParametersStructure struct {
 }
 
 type TemplateParamsStructure struct {
-	HomePage, EmployeeLogin, EmployeeRegister, HirerLogin, HirerRegister TemplateData
+	HomePage, EmployeeLogin, EmployeeRegister, HirerLogin, HirerRegister TemplateDataStructure
 }
 
-type TemplateData struct {
+type TemplateDataStructure struct {
 	PageName string
+	UserData UserDataStructure
+}
+
+type UserDataStructure struct {
+	Username string
+	Authentificated bool
+}
+
+type TokenStruct struct {
+	Name string
+	LifeTime int
 }

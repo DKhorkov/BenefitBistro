@@ -40,18 +40,18 @@ func (db_adapter *DatabaseAdapter) OpenConnection() error {
 }
 
 func (db_adapter *DatabaseAdapter) createTablesIfNotExists() error {
-	err := db_adapter.createTableIfNotExists(&db_models.EmployeeUsers{})
-	if err != nil {
-		return err
-	}
+	// Список всех таблиц, чтобы создать их итеративно:
+	tables := []interface{} {&db_models.EmployeeUsers{}, &db_models.HirerUsers{}}
 
-	err = db_adapter.createTableIfNotExists(&db_models.HirerUsers{})
-	if err != nil {
-		return err
+	for _, table := range tables {
+		err := db_adapter.createTableIfNotExists(table)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
-} 
+}
 
 func (db_adapter *DatabaseAdapter) createTableIfNotExists(table interface{}) error {
 	if !db_adapter.db.Migrator().HasTable(table) {
@@ -70,6 +70,8 @@ func (db_adapter *DatabaseAdapter) createTableIfNotExists(table interface{}) err
 
 
 func (db_adapter *DatabaseAdapter) SaveEmployee(username, password string) error {
+
+	// TODO сделать проверку на уже существующего юзера. В зависиости от этого возвращать разные ошибки.
 	db_adapter.db.Create(&db_models.EmployeeUsers{
 		Username: username,
 		Password: password,

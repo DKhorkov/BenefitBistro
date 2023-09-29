@@ -16,7 +16,10 @@ func Run() {
             config.RoutesHandlersInfo.StaticFiles.URLPath, config.StaticFiles))
 
     // Создаем обработку юрлов
-    server.HandleFunc(config.RoutesHandlersInfo.HomePage.URLPath, routes_handle_functions.HomePageHandler)
+    server.HandleFunc(
+        config.RoutesHandlersInfo.HomePage.URLPath,
+        routes_handle_functions.AuthHandlerOverride(
+            routes_handle_functions.HomePageHandler))
     server.HandleFunc(
         config.RoutesHandlersInfo.EmployeeRegister.URLPath, 
         routes_handle_functions.EmployeeRegisterPageHandler)

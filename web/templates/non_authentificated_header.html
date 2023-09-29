@@ -1,0 +1,21 @@
+{{ define "non_authentificated_header" }}
+<header>
+  <nav class="navbar navbar-expand-lg bg-body-tertiary">
+    <div class="container-fluid">
+      {{ template "navbar_core" }}
+
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0 auth-list">
+        <li class="nav-item">
+          <a class="btn btn-outline-success login-button" href="#">Войти как сотрудник</a>
+        </li>
+        <li class="nav-item">
+          <a class="btn btn-outline-success login-button" href="#">Войти как работодатель</a>
+        </li>
+        <!-- <li class="nav-item">
+            <a class="btn btn-outline-success register-button" href="/employeeRegister/">Зарегистрироваться</a>
+          </li> -->
+      </ul>
+    </div>
+  </nav>
+</header>
+{{ end }}
