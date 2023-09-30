@@ -1,4 +1,4 @@
-{{ define "employeeRegister" }}
+{{ define "employeeLogin" }}
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -8,15 +8,15 @@
   <body>
     {{ template "non_authentificated_header" }}
 
-    <form method="post" action="/saveEmployee/">
+    <form method="post" action="/authEmployee/">
       <label for="username">Username</label>
       <input type="text" name="username" placeholder="username" minlength="5" required />
       <label for="password">Password</label>
       <input type="password" name="password" placeholder="password" minlength="8" required />
-      <button type="submit">Register</button>
+      <button type="submit">Login</button>
     </form>
     <a href="/">Back</a>
-    <a href="/employeeLogin/">Login</a>
+    <a href="/employeeRegister/">Зарегистрироваться как Сотрудник</a>
 
     {{ template "footer" }}
   </body>

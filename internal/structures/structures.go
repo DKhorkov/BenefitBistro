@@ -1,5 +1,9 @@
 package structures
 
+import (
+	"time"
+)
+
 type RouteHandlersInfoStructure struct {
 	StaticFiles, 
 	HomePage, 
@@ -7,7 +11,8 @@ type RouteHandlersInfoStructure struct {
 	EmployeeRegister, 
 	HirerLogin, 
 	HirerRegister, 
-	SaveEmployee RouteInfoStructure
+	SaveEmployee,
+	AuthEmployee RouteInfoStructure
 }
 
 type RouteInfoStructure struct {
@@ -34,6 +39,7 @@ type UserDataStructure struct {
 }
 
 type TokenStruct struct {
-	Name string
+	Name, Path string
 	LifeTime int
+	ExpiresDuration time.Duration
 }

@@ -26,6 +26,12 @@ func Run() {
     server.HandleFunc(
         config.RoutesHandlersInfo.SaveEmployee.URLPath, 
         routes_handle_functions.SaveEmployeeHandler)
+    server.HandleFunc(
+        config.RoutesHandlersInfo.EmployeeLogin.URLPath, 
+        routes_handle_functions.EmployeeLoginPageHandler)
+    server.HandleFunc(
+        config.RoutesHandlersInfo.AuthEmployee.URLPath, 
+        routes_handle_functions.AuthEmployeeHandler)
 
     http.ListenAndServe(config.ServerParameters.Host + ":" + config.ServerParameters.Port, server)
 }

@@ -1,6 +1,8 @@
 package config
 
 import (
+	"time"
+
 	"html/template"
 	"net/http"
 	"structures"
@@ -15,6 +17,7 @@ var template_files []string = []string{
 	"web/templates/homepage.html",
 	"web/templates/headTags.html",
 	"web/templates/employeeRegister.html",
+	"web/templates/employeeLogin.html",
 }
 
 var static_files_dir string = "web/static/"
@@ -38,6 +41,14 @@ var RoutesHandlersInfo structures.RouteHandlersInfoStructure = structures.RouteH
 	SaveEmployee: structures.RouteInfoStructure{
 		TemplateName: "saveEmployee",
 		URLPath: "/saveEmployee/",
+	},
+	EmployeeLogin: structures.RouteInfoStructure{
+		TemplateName: "employeeLogin",
+		URLPath: "/employeeLogin/",
+	},
+	AuthEmployee: structures.RouteInfoStructure{
+		TemplateName: "authEmployee",
+		URLPath: "/authEmployee/",
 	},
 }
 
@@ -68,4 +79,6 @@ var CryptKey []byte = []byte("574d93e6298df2e83e5c6b4dc63ae928")
 var Token structures.TokenStruct = structures.TokenStruct{
 	Name: "Access-Token",
 	LifeTime: 2 * 7 * 24 * 60 * 60, // 2 weeks
+	Path: "/", // Path должен быть общим, чтобы кукис распространялись на весь сайт
+	ExpiresDuration: time.Second * 2 * 7 * 24 * 60 * 60, // Expires in 2 weeks
 }

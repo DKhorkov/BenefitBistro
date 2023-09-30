@@ -19,8 +19,8 @@ import (
 	https://stackoverflow.com/questions/10701874/generating-the-sha-hash-of-a-string-using-golang
 */
 
-func EncryptMessage(message string) (string, error) {
-	byteMsg := []byte(message)
+func Encrypt(text string) (string, error) {
+	byteMsg := []byte(text)
 	block, err := aes.NewCipher(config.CryptKey)
 	if err != nil {
 		err := fmt.Errorf("could not create new cipher: %v", err)
@@ -42,8 +42,8 @@ func EncryptMessage(message string) (string, error) {
 	return base64.StdEncoding.EncodeToString(cipherText), nil
 }
 
-func DecryptMessage(message string) (string, error) {
-	cipherText, err := base64.StdEncoding.DecodeString(message)
+func Decryp(text string) (string, error) {
+	cipherText, err := base64.StdEncoding.DecodeString(text)
 	if err != nil {
 		err := fmt.Errorf("could not base64 decode: %v", err)
 		logging.Log.Println(err)
