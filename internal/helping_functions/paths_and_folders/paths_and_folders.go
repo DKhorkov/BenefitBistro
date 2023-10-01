@@ -1,4 +1,4 @@
-package helping_functions
+package paths_and_folders
 
 import (
 	"os"

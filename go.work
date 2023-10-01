@@ -6,7 +6,8 @@ use (
 	./internal/config
 	./internal/database/adapter
 	./internal/database/models
-	./internal/helping_functions
+	./internal/helping_functions/auth
+	./internal/helping_functions/paths_and_folders
 	./internal/logging
 	./internal/mycrypto
 	./internal/routes_handle_functions

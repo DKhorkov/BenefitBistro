@@ -5,7 +5,7 @@ import (
 	"os"
 
 	"config"
-	"helping_functions"
+	"paths_and_folders"
 )
 
 
@@ -15,12 +15,12 @@ var (
 
 
 func init() {
-	err := helping_functions.CreateFolderIfNotExists(config.LogDir)
+	err := paths_and_folders.CreateFolderIfNotExists(config.LogDir)
 	if err != nil {
 		panic(err)
 	}
 
-	err = helping_functions.CreateFileIfNotExists(config.LogPath)
+	err = paths_and_folders.CreateFileIfNotExists(config.LogPath)
 	if err != nil {
 		panic(err)
 	}

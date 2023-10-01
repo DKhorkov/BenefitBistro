@@ -53,7 +53,7 @@ var RoutesHandlersInfo structures.RouteHandlersInfoStructure = structures.RouteH
 }
 
 var ServerParameters structures.ServerParametersStructure = structures.ServerParametersStructure{
-	Port: "8090",
+	Port: "8080",
 }
 
 var temporatyFolder string = "tmp/"
@@ -81,4 +81,6 @@ var Token structures.TokenStruct = structures.TokenStruct{
 	LifeTime: 2 * 7 * 24 * 60 * 60, // 2 weeks
 	Path: "/", // Path должен быть общим, чтобы кукис распространялись на весь сайт
 	ExpiresDuration: time.Second * 2 * 7 * 24 * 60 * 60, // Expires in 2 weeks
+	HirerPrefix: "hirer_",
+	EmployeePrefix: "employee_",
 }

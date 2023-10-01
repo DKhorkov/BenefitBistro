@@ -39,7 +39,7 @@ type UserDataStructure struct {
 }
 
 type TokenStruct struct {
-	Name, Path string
+	Name, Path, HirerPrefix, EmployeePrefix string
 	LifeTime int
 	ExpiresDuration time.Duration
 }

@@ -4,6 +4,7 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
+	"crypto/sha256"
 	"encoding/base64"
 	"fmt"
 	"io"
@@ -70,4 +71,15 @@ func Decryp(text string) (string, error) {
 	stream.XORKeyStream(cipherText, cipherText)
 
 	return string(cipherText), nil
+}
+
+func HashPassword(password string) (string, error) {
+	hashFunc := sha256.New()
+
+	if _, err := hashFunc.Write([]byte(password)); err != nil {
+		return "", err
+	}
+
+	hashed_password := hashFunc.Sum(nil)
+	return fmt.Sprintf("%x", hashed_password), nil
 }

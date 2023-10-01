@@ -18,8 +18,9 @@ func Run() {
     // Создаем обработку юрлов
     server.HandleFunc(
         config.RoutesHandlersInfo.HomePage.URLPath,
-        routes_handle_functions.AuthHandlerOverride(
-            routes_handle_functions.HomePageHandler))
+        routes_handle_functions.AuthHandlerDelegat(
+            routes_handle_functions.HomePageHandler,
+            true))
     server.HandleFunc(
         config.RoutesHandlersInfo.EmployeeRegister.URLPath, 
         routes_handle_functions.EmployeeRegisterPageHandler)

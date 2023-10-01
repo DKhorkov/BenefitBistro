@@ -6,6 +6,7 @@ import (
 
 	"gorm.io/gorm"
 
+	"auth"
 	"config"
 	"db_adapter"
 	"logging"
@@ -14,29 +15,39 @@ import (
 )
 
 
-func AuthHandlerOverride(
+func AuthHandlerDelegat(
 	handler func(
 		response http.ResponseWriter,
 		request *http.Request, 
-		user_data structures.UserDataStructure)) http.HandlerFunc {
+		user_data structures.UserDataStructure),
+	need_to_redirect bool) http.HandlerFunc {
 
 		return func(response http.ResponseWriter, request *http.Request) {
 			var user_data structures.UserDataStructure
 
 			cookie, err := request.Cookie(config.Token.Name)
-			if err != nil {
+			if err != nil && need_to_redirect {
+				http.Redirect(response, request, config.RoutesHandlersInfo.EmployeeLogin.URLPath, http.StatusSeeOther)
+				return
+			} else if err != nil {
 				user_data.Username = ""
 				user_data.Authentificated = false
-				logging.Log.Printf("all_cookies: %v, Cookie: %s, Error: %v\n", request.Cookies(), cookie, err)
 			} else {
-				// Here should be token validation and getting username
-				user_data.Username = "SomeUser"
-				user_data.Authentificated = true
-				logging.Log.Printf("Cookie: %s\n", cookie) // TODO Delete after cookie validation
+				err := auth.ProcessTokenValidation(
+					cookie, 
+					need_to_redirect, 
+					&user_data, 
+					response, 
+					request)
+
+				if err != nil {
+					logging.Log.Printf("Error during AuthDelegat: %v\n", err)
+					return
+				}
 			}
 
 			handler(response, request, user_data)
-	}
+		}
 }
 
 func HomePageHandler(
@@ -44,120 +55,175 @@ func HomePageHandler(
 	request *http.Request, 
 	user_data structures.UserDataStructure) {
 
-	config.TemplatesParams.HomePage.UserData.Username = user_data.Username
-	config.TemplatesParams.HomePage.UserData.Authentificated = user_data.Authentificated
+		config.TemplatesParams.HomePage.UserData.Username = user_data.Username
+		config.TemplatesParams.HomePage.UserData.Authentificated = user_data.Authentificated
 
-	// Используем ExecuteTemplate метод, а не простой Execute, чтобы работало наследование шаблонов
-    err := config.Templates.ExecuteTemplate(
-		response, 
-		config.RoutesHandlersInfo.HomePage.TemplateName, 
-		config.TemplatesParams.HomePage) 
+		// Используем ExecuteTemplate метод, а не простой Execute, чтобы работало наследование шаблонов
+		err := config.Templates.ExecuteTemplate(
+			response, 
+			config.RoutesHandlersInfo.HomePage.TemplateName, 
+			config.TemplatesParams.HomePage) 
 
-	if err != nil {
-		logging.LogTemplateExecuteError(config.RoutesHandlersInfo.HomePage.TemplateName, err)
-		http.NotFound(response, request)
-	}
+		if err != nil {
+			logging.LogTemplateExecuteError(config.RoutesHandlersInfo.HomePage.TemplateName, err)
+			http.NotFound(response, request)
+		}
 }
 
 func EmployeeLoginPageHandler(
 	response http.ResponseWriter, 
 	request *http.Request) {
 
-    err := config.Templates.ExecuteTemplate(
-		response, 
-		config.RoutesHandlersInfo.EmployeeLogin.TemplateName, 
-		config.TemplatesParams.EmployeeLogin) 
+		err := config.Templates.ExecuteTemplate(
+			response, 
+			config.RoutesHandlersInfo.EmployeeLogin.TemplateName, 
+			config.TemplatesParams.EmployeeLogin) 
 
-	if err != nil {
-		logging.LogTemplateExecuteError(config.RoutesHandlersInfo.EmployeeLogin.TemplateName, err)
-		http.NotFound(response, request)
-	}
+		if err != nil {
+			logging.LogTemplateExecuteError(config.RoutesHandlersInfo.EmployeeLogin.TemplateName, err)
+			http.NotFound(response, request)
+		}
 }
 
 func AuthEmployeeHandler(
 	response http.ResponseWriter, 
 	request *http.Request) {
-		
+
+		var username, password string = request.FormValue("username"), request.FormValue("password")
+		hashed_password, err := mycrypto.HashPassword(password)
+		if err != nil {
+			logging.LogTemplateExecuteError(config.RoutesHandlersInfo.AuthEmployee.TemplateName, err)
+			http.Redirect(
+				response, 
+				request, 
+				config.RoutesHandlersInfo.EmployeeLogin.TemplateName, 
+				http.StatusInternalServerError)
+
+			return
+		}
+	
+		db_adapter := db_adapter.DatabaseAdapter{}
+
+		var corresponds bool
+		corresponds, err = db_adapter.CompareEmployeeAuthData(username, hashed_password)
+		if err != nil {
+			// TODO создать отдельный метод для логирования и переадресации, чтобы не дублироваться
+			logging.LogTemplateExecuteError(config.RoutesHandlersInfo.AuthEmployee.TemplateName, err)
+			http.Redirect(
+				response, 
+				request, 
+				config.RoutesHandlersInfo.EmployeeLogin.TemplateName, 
+				http.StatusResetContent)
+
+			return
+		} else if !corresponds {
+			logging.LogTemplateExecuteError(config.RoutesHandlersInfo.AuthEmployee.TemplateName, err)
+			http.Redirect(
+				response, 
+				request, 
+				config.RoutesHandlersInfo.EmployeeLogin.TemplateName, 
+				http.StatusResetContent)
+
+			return
+		}
+
+		// TODO need to change Token Generation to JWT
+		token, err := mycrypto.Encrypt(fmt.Sprintf("%v+%v", username, password))
+		if err != nil {
+			logging.LogTemplateExecuteError(config.RoutesHandlersInfo.AuthEmployee.TemplateName, err)
+			http.Redirect(
+				response, 
+				request, 
+				config.RoutesHandlersInfo.EmployeeLogin.TemplateName, 
+				http.StatusInternalServerError)
+			
+			return
+		}
+
+		token = config.Token.EmployeePrefix + token
+		err = db_adapter.SaveToken(username, token)
+		if err != nil {
+			logging.LogTemplateExecuteError(config.RoutesHandlersInfo.AuthEmployee.TemplateName, err)
+			http.Redirect(
+				response, 
+				request, 
+				config.RoutesHandlersInfo.EmployeeLogin.TemplateName, 
+				http.StatusInternalServerError)
+			
+			return
+		}
+
+		cookie := &http.Cookie{
+			Name: config.Token.Name, 
+			Value: token, 
+			MaxAge: config.Token.LifeTime,
+			Path: config.Token.Path}
+		http.SetCookie(response, cookie)
+
+		// Используем прямой вызов хэндлера вместо http.Redirect из-за бесконечной переадресации в связи с тем, как строится URL при редиректе
+		http.RedirectHandler(config.RoutesHandlersInfo.HomePage.URLPath, http.StatusFound).ServeHTTP(response, request)
 }
 
 func EmployeeRegisterPageHandler(
 	response http.ResponseWriter, 
 	request *http.Request) {
 
-    err := config.Templates.ExecuteTemplate(
-		response, 
-		config.RoutesHandlersInfo.EmployeeRegister.TemplateName, 
-		config.TemplatesParams.EmployeeRegister) 
+		err := config.Templates.ExecuteTemplate(
+			response, 
+			config.RoutesHandlersInfo.EmployeeRegister.TemplateName, 
+			config.TemplatesParams.EmployeeRegister) 
 
-	if err != nil {
-		logging.LogTemplateExecuteError(config.RoutesHandlersInfo.EmployeeRegister.TemplateName, err)
-		http.NotFound(response, request)
-	}
+		if err != nil {
+			logging.LogTemplateExecuteError(config.RoutesHandlersInfo.EmployeeRegister.TemplateName, err)
+			http.NotFound(response, request)
+		}
 }
 
 func SaveEmployeeHandler(
 	response http.ResponseWriter, 
 	request *http.Request) {
 
-	var username, password string = request.FormValue("username"), request.FormValue("password")
-
-	db_adapter := db_adapter.DatabaseAdapter{}
-	err := db_adapter.OpenConnection()
-	if err != nil {
-		logging.LogTemplateExecuteError(config.RoutesHandlersInfo.SaveEmployee.TemplateName, err)
-		http.Redirect(response, request, config.RoutesHandlersInfo.HomePage.TemplateName, http.StatusInternalServerError)
-	}
-
-	var encrypted_password string
-	encrypted_password, err = mycrypto.Encrypt(password)
-	if err != nil {
-		logging.LogTemplateExecuteError(config.RoutesHandlersInfo.SaveEmployee.TemplateName, err)
-		http.Redirect(response, request, config.RoutesHandlersInfo.HomePage.TemplateName, http.StatusInternalServerError)
-	}
-
-	err = db_adapter.SaveEmployee(
-		username, 
-		encrypted_password)
-
-	switch (err) {
-		case nil:
-			break
-		case gorm.ErrRegistered:
-			// TODO вынести в отдельный хэндлер, универсальный для всех типов ошибок + подумать над шаблонами для данных ошибок, чтобы юзер мог вернуться на главную страницу
-			err_text := fmt.Sprintf("User with username=%s already registered. Error: %v\n", username, err) 
-			logging.Log.Println(err_text)
-			response.WriteHeader(http.StatusConflict)
-			fmt.Fprintln(response, err_text)
-			return
-		default:
+		var username, password string = request.FormValue("username"), request.FormValue("password")
+		hashed_password, err := mycrypto.HashPassword(password)
+		if err != nil {
 			logging.LogTemplateExecuteError(config.RoutesHandlersInfo.SaveEmployee.TemplateName, err)
 			http.Redirect(
 				response, 
 				request, 
 				config.RoutesHandlersInfo.HomePage.TemplateName, 
 				http.StatusInternalServerError)
-	}
 
-	err = db_adapter.SaveToken(username, "sometokenname")
-	if err != nil {
-		logging.LogTemplateExecuteError(config.RoutesHandlersInfo.SaveEmployee.TemplateName, err)
-		http.Redirect(response, request, config.RoutesHandlersInfo.HomePage.TemplateName, http.StatusInternalServerError)
-	}
+			return
+		}
 
-	err = db_adapter.CloseConnection()
-	if err != nil {
-		logging.LogTemplateExecuteError(config.RoutesHandlersInfo.SaveEmployee.TemplateName, err)
-		http.Redirect(response, request, config.RoutesHandlersInfo.HomePage.TemplateName, http.StatusInternalServerError)
-	}
+		db_adapter := db_adapter.DatabaseAdapter{}
+		err = db_adapter.SaveEmployee(
+			username, 
+			hashed_password)
 
-	// TODO need to add token generation here AND MOVE TO LOGIN PAGE. ALSO CHANGE REDIRECT TO LOGIN PAGE
-	cookie1 := http.Cookie{
-		Name: config.Token.Name, 
-		Value: "SomeTokenValue", 
-		MaxAge: config.Token.LifeTime,
-		Path: config.Token.Path}
-    http.SetCookie(response, &cookie1)
+		switch (err) {
+			case nil:
+				break
+			case gorm.ErrRegistered:
+				// TODO вынести в отдельный хэндлер, универсальный для всех типов ошибок + подумать над шаблонами для данных ошибок, чтобы юзер мог вернуться на главную страницу
+				err_text := fmt.Sprintf("User with username=%s already registered. Error: %v\n", username, err) 
+				logging.Log.Println(err_text)
+				response.WriteHeader(http.StatusConflict)
+				fmt.Fprintln(response, err_text)
+				return
+			default:
+				logging.LogTemplateExecuteError(config.RoutesHandlersInfo.SaveEmployee.TemplateName, err)
+				http.Redirect(
+					response, 
+					request, 
+					config.RoutesHandlersInfo.HomePage.TemplateName, 
+					http.StatusInternalServerError)
 
-	// Используем прямой вызов хэндлера вместо http.Redirect из-за бесконечной переадресации в связи с тем, как строится URL при редиректе
-	http.RedirectHandler(config.RoutesHandlersInfo.HomePage.URLPath, http.StatusFound).ServeHTTP(response, request)
+				return
+		}
+
+		// Используем прямой вызов хэндлера вместо http.Redirect из-за бесконечной переадресации в связи с тем, как строится URL при редиректе
+		http.RedirectHandler(
+			config.RoutesHandlersInfo.EmployeeLogin.URLPath, 
+			http.StatusSeeOther).ServeHTTP(response, request)
 }
