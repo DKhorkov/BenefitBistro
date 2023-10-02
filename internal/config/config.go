@@ -50,6 +50,10 @@ var RoutesHandlersInfo structures.RouteHandlersInfoStructure = structures.RouteH
 		TemplateName: "authEmployee",
 		URLPath: "/authEmployee/",
 	},
+	Logout: structures.RouteInfoStructure{
+		TemplateName: "logout",
+		URLPath: "/logout/",
+	},
 }
 
 var ServerParameters structures.ServerParametersStructure = structures.ServerParametersStructure{

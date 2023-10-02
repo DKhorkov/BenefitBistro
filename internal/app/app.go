@@ -20,7 +20,7 @@ func Run() {
         config.RoutesHandlersInfo.HomePage.URLPath,
         routes_handle_functions.AuthHandlerDelegat(
             routes_handle_functions.HomePageHandler,
-            true))
+            false))
     server.HandleFunc(
         config.RoutesHandlersInfo.EmployeeRegister.URLPath, 
         routes_handle_functions.EmployeeRegisterPageHandler)
@@ -33,6 +33,9 @@ func Run() {
     server.HandleFunc(
         config.RoutesHandlersInfo.AuthEmployee.URLPath, 
         routes_handle_functions.AuthEmployeeHandler)
+    server.HandleFunc(
+        config.RoutesHandlersInfo.Logout.URLPath, 
+        routes_handle_functions.LogoutHandler)
 
     http.ListenAndServe(config.ServerParameters.Host + ":" + config.ServerParameters.Port, server)
 }

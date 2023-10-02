@@ -25,7 +25,7 @@ func AuthHandlerDelegat(
 		return func(response http.ResponseWriter, request *http.Request) {
 			var user_data structures.UserDataStructure
 
-			cookie, err := request.Cookie(config.Token.Name)
+			token, err := auth.GetAccessToken(request)
 			if err != nil && need_to_redirect {
 				http.Redirect(response, request, config.RoutesHandlersInfo.EmployeeLogin.URLPath, http.StatusSeeOther)
 				return
@@ -34,7 +34,7 @@ func AuthHandlerDelegat(
 				user_data.Authentificated = false
 			} else {
 				err := auth.ProcessTokenValidation(
-					cookie, 
+					token, 
 					need_to_redirect, 
 					&user_data, 
 					response, 
@@ -226,4 +226,27 @@ func SaveEmployeeHandler(
 		http.RedirectHandler(
 			config.RoutesHandlersInfo.EmployeeLogin.URLPath, 
 			http.StatusSeeOther).ServeHTTP(response, request)
+}
+
+func LogoutHandler(
+	response http.ResponseWriter, 
+	request *http.Request) {
+
+		token, err := auth.GetAccessToken(request)
+		if err != nil {
+			http.RedirectHandler(config.RoutesHandlersInfo.HomePage.URLPath, http.StatusFound).ServeHTTP(response, request)
+			return
+		}
+
+		db_adapter := db_adapter.DatabaseAdapter{}
+		db_adapter.DeleteToken(token)
+
+		cookie := &http.Cookie{
+			Name: config.Token.Name, 
+			Value: "", 
+			MaxAge: -1,
+			Path: config.Token.Path}
+
+		http.SetCookie(response, cookie)
+		http.RedirectHandler(config.RoutesHandlersInfo.HomePage.URLPath, http.StatusFound).ServeHTTP(response, request)
 }

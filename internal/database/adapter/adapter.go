@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"strings"
 	"time"
 
 	"gorm.io/driver/sqlite"
@@ -153,7 +154,7 @@ func (db_adapter *DatabaseAdapter) CompareEmployeeAuthData(username, password st
 
 	defer db_adapter.closeConnection()
 
-	user , err := db_adapter.findUserByUsername(username)
+	user, err := db_adapter.findUserByUsername(username)
 	if err != nil {
 		return false, err
 	}
@@ -194,6 +195,7 @@ func (db_adapter *DatabaseAdapter) ValidateEmployeeToken(token string) (*db_mode
 	
 	if time.Now().After(token_to_find.Expires) {
 		logging.Log.Printf("Token=%v has Expired\n", token)
+		db_adapter.deleteEmployeeToken(token)
 		return user, errors.New("token expired")
 	}
 
@@ -234,4 +236,40 @@ func (db_adapter *DatabaseAdapter) getTableName(model interface{}) (string, erro
 
 	tableName := stmt.Schema.Table
 	return tableName, nil
+}
+
+func (db_adapter *DatabaseAdapter) DeleteToken(token string) error {
+	if strings.HasPrefix(token, config.Token.EmployeePrefix) {
+		return db_adapter.deleteEmployeeToken(token)
+	} else {
+		return db_adapter.deleteHirerToken(token)
+	}
+}
+
+func (db_adapter *DatabaseAdapter) deleteEmployeeToken(token string) error {
+	if err := db_adapter.openConnection(); err != nil {
+		logging.Log.Printf("Failed to compare EmployeeAuthData via problems with database connecton: %v\n", err)
+		return err
+	}
+
+	defer db_adapter.closeConnection()
+
+	token_to_delete := &db_models.EmployeeTokens{Token: token}
+	if err := db_adapter.db.Where(token_to_delete).Delete(token_to_delete).Error; err != nil {
+		logging.Log.Printf("Failed to delete token=%v. Error: %v\n", token, err)
+		return err
+	}
+
+	return nil
+}
+
+func (db_adapter *DatabaseAdapter) deleteHirerToken(token string) error {
+	if err := db_adapter.openConnection(); err != nil {
+		logging.Log.Printf("Failed to compare EmployeeAuthData via problems with database connecton: %v\n", err)
+		return err
+	}
+
+	defer db_adapter.closeConnection()
+
+	return nil
 }

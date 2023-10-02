@@ -12,7 +12,8 @@ type RouteHandlersInfoStructure struct {
 	HirerLogin, 
 	HirerRegister, 
 	SaveEmployee,
-	AuthEmployee RouteInfoStructure
+	AuthEmployee,
+	Logout RouteInfoStructure
 }
 
 type RouteInfoStructure struct {

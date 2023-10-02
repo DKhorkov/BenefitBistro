@@ -13,16 +13,15 @@ import (
 
 
 func ProcessTokenValidation(
-	cookie *http.Cookie, 
+	token string, 
 	need_to_redirect bool,
 	user_data *structures.UserDataStructure, 
 	response http.ResponseWriter, 
 	request *http.Request) error {
 
-		trimed_token := strings.TrimPrefix(cookie.String(), fmt.Sprintf("%v=", config.Token.Name))
 		db_adapter := db_adapter.DatabaseAdapter{}
-		if strings.HasPrefix(trimed_token, config.Token.EmployeePrefix) {
-			user, err := db_adapter.ValidateEmployeeToken(trimed_token)
+		if strings.HasPrefix(token, config.Token.EmployeePrefix) {
+			user, err := db_adapter.ValidateEmployeeToken(token)
 			return checkIfTokenIsValid(
 				err, 
 				need_to_redirect, 
@@ -32,7 +31,7 @@ func ProcessTokenValidation(
 				response, 
 				request)
 		} else {
-			user, err := db_adapter.ValidateHirerToken(trimed_token)
+			user, err := db_adapter.ValidateHirerToken(token)
 			return checkIfTokenIsValid(
 				err, 
 				need_to_redirect, 
@@ -67,4 +66,14 @@ func checkIfTokenIsValid(
 		}
 		
 		return nil
+}
+
+func GetAccessToken(request *http.Request) (string, error) {
+	cookie, err := request.Cookie(config.Token.Name)
+	if err != nil {
+		return "", err
+	}
+
+	token := strings.TrimPrefix(cookie.String(), fmt.Sprintf("%v=", config.Token.Name))
+	return token, nil
 }
