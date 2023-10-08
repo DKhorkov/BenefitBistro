@@ -43,7 +43,7 @@ func Encrypt(text string) (string, error) {
 	return base64.StdEncoding.EncodeToString(cipherText), nil
 }
 
-func Decryp(text string) (string, error) {
+func Decrypt(text string) (string, error) {
 	cipherText, err := base64.StdEncoding.DecodeString(text)
 	if err != nil {
 		err := fmt.Errorf("could not base64 decode: %v", err)

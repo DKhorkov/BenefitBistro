@@ -210,10 +210,13 @@ func (db_adapter *DatabaseAdapter) ValidateEmployeeToken(token string) (*db_mode
 	}
 
 	join_stmt := fmt.Sprintf(
-		"JOIN %v ON %v.user_id = %v.id", 
+		"JOIN %v ON %v.user_id = %v.id WHERE %v.id = %v", 
 		employee_tokens_table_name, 
 		employee_tokens_table_name, 
-		employee_users_table_name)
+		employee_users_table_name,
+		employee_users_table_name,
+		token_to_find.UserID,
+	)
 
 	if err := db_adapter.db.Table(employee_users_table_name).Select("*").Joins(join_stmt).Scan(user).Error; err != nil {
 		logging.Log.Printf("Failed to find user for token=%v. Error:%v\n", token, err)

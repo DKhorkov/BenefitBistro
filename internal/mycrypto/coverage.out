@@ -1,0 +1,16 @@
+mode: set
+mycrypto/mycrypto.go:23.43,26.16 3 1
+mycrypto/mycrypto.go:26.16,30.3 3 0
+mycrypto/mycrypto.go:32.2,34.55 3 1
+mycrypto/mycrypto.go:34.55,38.3 3 0
+mycrypto/mycrypto.go:40.2,43.59 3 1
+mycrypto/mycrypto.go:46.43,48.16 2 1
+mycrypto/mycrypto.go:48.16,52.3 3 0
+mycrypto/mycrypto.go:54.2,55.16 2 1
+mycrypto/mycrypto.go:55.16,59.3 3 0
+mycrypto/mycrypto.go:61.2,61.37 1 1
+mycrypto/mycrypto.go:61.37,65.3 3 0
+mycrypto/mycrypto.go:67.2,73.32 5 1
+mycrypto/mycrypto.go:76.52,79.60 2 1
+mycrypto/mycrypto.go:79.60,81.3 1 0
+mycrypto/mycrypto.go:83.2,84.48 2 1

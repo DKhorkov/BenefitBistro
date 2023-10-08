@@ -3,13 +3,11 @@ package config
 import (
 	"time"
 
-	"html/template"
-	"net/http"
 	"structures"
 )
 
 
-var template_files []string = []string{
+var TemplateFiles []string = []string{
 	"web/templates/navbar_core.html",
 	"web/templates/non_authentificated_header.html",
 	"web/templates/authentificated_header.html",
@@ -20,11 +18,7 @@ var template_files []string = []string{
 	"web/templates/employeeLogin.html",
 }
 
-var static_files_dir string = "web/static/"
-var StaticFiles = http.FileServer(http.Dir(static_files_dir))
-
-// Чтобы использовать наследование HTML шаблонов в го, необходимо передать их все в ParseFiles
-var Templates = template.Must(template.ParseFiles(template_files...))
+var StaticFilesDir string = "web/static/"
 
 var RoutesHandlersInfo structures.RouteHandlersInfoStructure = structures.RouteHandlersInfoStructure{
 	StaticFiles: structures.RouteInfoStructure{
@@ -62,7 +56,7 @@ var ServerParameters structures.ServerParametersStructure = structures.ServerPar
 
 var temporatyFolder string = "tmp/"
 var LogDir string = temporatyFolder + "logs/"
-var LogPath string = LogDir + "log_file"
+var LogPath string = LogDir + "log_file.log"
 
 // Указатель, чтобы можно было динамически менять в процессе рабоыт приложения
 var TemplatesParams *structures.TemplateParamsStructure = &structures.TemplateParamsStructure{

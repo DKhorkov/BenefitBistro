@@ -1,8 +1,9 @@
 package app
 
 import (
-	"config"
 	"net/http"
+
+	"config"
 	"routes_handle_functions"
 )
 
@@ -10,10 +11,11 @@ func Run() {
 	server := http.NewServeMux()
 
     // Подключаем обработку стилей для всех юрлов
+    var staticFiles = http.FileServer(http.Dir(config.StaticFilesDir))
     server.Handle(
         config.RoutesHandlersInfo.StaticFiles.URLPath, 
         http.StripPrefix(
-            config.RoutesHandlersInfo.StaticFiles.URLPath, config.StaticFiles))
+            config.RoutesHandlersInfo.StaticFiles.URLPath, staticFiles))
 
     // Создаем обработку юрлов
     server.HandleFunc(

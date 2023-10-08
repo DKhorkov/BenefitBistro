@@ -2,6 +2,7 @@ package routes_handle_functions
 
 import (
 	"fmt"
+	"html/template"
 	"net/http"
 
 	"gorm.io/gorm"
@@ -13,6 +14,9 @@ import (
 	"mycrypto"
 	"structures"
 )
+
+// Чтобы использовать наследование HTML шаблонов в го, необходимо передать их все в ParseFiles
+var templates = template.Must(template.ParseFiles(config.TemplateFiles...))
 
 
 func AuthHandlerDelegat(
@@ -59,7 +63,7 @@ func HomePageHandler(
 		config.TemplatesParams.HomePage.UserData.Authentificated = user_data.Authentificated
 
 		// Используем ExecuteTemplate метод, а не простой Execute, чтобы работало наследование шаблонов
-		err := config.Templates.ExecuteTemplate(
+		err := templates.ExecuteTemplate(
 			response, 
 			config.RoutesHandlersInfo.HomePage.TemplateName, 
 			config.TemplatesParams.HomePage) 
@@ -74,7 +78,7 @@ func EmployeeLoginPageHandler(
 	response http.ResponseWriter, 
 	request *http.Request) {
 
-		err := config.Templates.ExecuteTemplate(
+		err := templates.ExecuteTemplate(
 			response, 
 			config.RoutesHandlersInfo.EmployeeLogin.TemplateName, 
 			config.TemplatesParams.EmployeeLogin) 
@@ -168,7 +172,7 @@ func EmployeeRegisterPageHandler(
 	response http.ResponseWriter, 
 	request *http.Request) {
 
-		err := config.Templates.ExecuteTemplate(
+		err := templates.ExecuteTemplate(
 			response, 
 			config.RoutesHandlersInfo.EmployeeRegister.TemplateName, 
 			config.TemplatesParams.EmployeeRegister) 
