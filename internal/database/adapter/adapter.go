@@ -19,16 +19,19 @@ import (
 
 type DatabaseAdapter struct {
 	db *gorm.DB
+	DatabaseFolder, DatabaseName string
 }
 
 func (db_adapter *DatabaseAdapter) openConnection() error {
-	err := paths_and_folders.CreateFolderIfNotExists(config.DatabaseFolder)
+	db_folder := db_adapter.getDatabaseFolder()
+	err := paths_and_folders.CreateFolderIfNotExists(db_folder)
 	if err != nil {
 		logging.Log.Printf("Failed to MakeAllFolders %s: %v", config.DatabaseFolder, err)
 		panic(err)
 	}
 
-	db_adapter.db, err = gorm.Open(sqlite.Open(config.DatabaseName), &gorm.Config{})
+	db_name := db_adapter.getDatabaseName()
+	db_adapter.db, err = gorm.Open(sqlite.Open(db_name), &gorm.Config{})
 
 	if err != nil {
 		logging.Log.Printf("Error during trying to connect to database: %v", err)
@@ -41,6 +44,28 @@ func (db_adapter *DatabaseAdapter) openConnection() error {
 	}
 
 	return nil
+}
+
+func (db_adapter *DatabaseAdapter) getDatabaseFolder() string {
+	var db_folder string
+	if db_adapter.DatabaseFolder == "" {
+		db_folder = config.DatabaseFolder
+	} else {
+		db_folder = db_adapter.DatabaseFolder
+	}
+
+	return db_folder
+}
+
+func (db_adapter *DatabaseAdapter) getDatabaseName() string {
+	var db_name string
+	if db_adapter.DatabaseName == "" {
+		db_name = config.DatabaseName
+	} else {
+		db_name = db_adapter.DatabaseName
+	}
+
+	return db_name
 }
 
 func (db_adapter *DatabaseAdapter) closeConnection() error {
