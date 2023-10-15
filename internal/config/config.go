@@ -3,6 +3,7 @@ package config
 import (
 	"time"
 
+	"paths_and_folders"
 	"structures"
 )
 
@@ -54,7 +55,8 @@ var ServerParameters structures.ServerParametersStructure = structures.ServerPar
 	Port: "8080",
 }
 
-var temporatyFolder string = "tmp/"
+var workspace_dir, _ = paths_and_folders.GetWorkspaceDir()
+var temporatyFolder string = workspace_dir + "/tmp/"
 var LogDir string = temporatyFolder + "logs/"
 var LogPath string = LogDir + "log_file.log"
 

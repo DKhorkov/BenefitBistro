@@ -3,14 +3,25 @@ package paths_and_folders
 import (
 	"fmt"
 	"os"
-	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 
 	"paths_and_folders/testdata"
 )
 
+func TestGetWorkspaceDir(test *testing.T) {
+	workspace_dir, err := GetWorkspaceDir()
+	assert.True(test, err == nil)
+	assert.Equal(
+		test, 
+		workspace_dir, 
+		testdata.ExpectedWorkspaceDir, 
+		"TestgetWorkspaceDir failed: %v != %v\n", workspace_dir, testdata.ExpectedWorkspaceDir)
+}
+
 func TestCreateFolderIfNotExists(test *testing.T) {
-	workspace_dir, err := getWorkspaceDir()
+	workspace_dir, err := GetWorkspaceDir()
 	if err != nil {
 		test.Errorf("Failed to get GO Workspace Dir. Error: %v\n", err)
 	}
@@ -25,7 +36,7 @@ func TestCreateFolderIfNotExists(test *testing.T) {
 }
 
 func TestCreateFileIfNotExists(test *testing.T) {
-	workspace_dir, err := getWorkspaceDir()
+	workspace_dir, err := GetWorkspaceDir()
 	if err != nil {
 		test.Errorf("Failed to get GO Workspace Dir. Error: %v\n", err)
 	}
@@ -37,20 +48,19 @@ func TestCreateFileIfNotExists(test *testing.T) {
 			test.Errorf("Failed to create file=%v. Error: %v\n", test_file_path, err)
 		}
 	}
-
 }
 
-func getWorkspaceDir() (string, error) {
-	cwd, err := os.Getwd()
+func TestDeletePath(test *testing.T) {
+	workspace_dir, err := GetWorkspaceDir()
 	if err != nil {
-		return "", err
+		test.Errorf("Failed to get GO Workspace Dir. Error: %v\n", err)
 	}
 
-	folders_sep := "/"
-	splitted_dirs := strings.Split(cwd, folders_sep)
-	workspace_dir := strings.Join(
-		splitted_dirs[:len(splitted_dirs) - 3], 
-		folders_sep) 
+	test_file_path := fmt.Sprintf("%v/%v", workspace_dir, testdata.TestFile)
+	err = DeletePath(test_file_path)
+	assert.True(test, err == nil)
 
-	return workspace_dir, nil
+	test_folder_path := fmt.Sprintf("%v/%v", workspace_dir, testdata.TestsDir) 
+	err = DeletePath(test_folder_path)
+	assert.True(test, err == nil)
 }
