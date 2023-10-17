@@ -145,7 +145,7 @@ func (db_adapter *DatabaseAdapter) SaveEmployee(username, password string) error
 	return nil
 }
 
-func (db_adapter *DatabaseAdapter) SaveToken(username, token string) error {
+func (db_adapter *DatabaseAdapter) SaveEmployeeToken(username, token string) error {
 	if err := db_adapter.openConnection(); err != nil {
 		logging.Log.Printf("Failed to save Token via problems with database connecton: %v\n", err)
 		return err

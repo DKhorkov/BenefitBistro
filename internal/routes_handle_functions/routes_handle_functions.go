@@ -145,7 +145,7 @@ func AuthEmployeeHandler(
 		}
 
 		token = config.Token.EmployeePrefix + token
-		err = db_adapter.SaveToken(username, token)
+		err = db_adapter.SaveEmployeeToken(username, token)
 		if err != nil {
 			logging.LogTemplateExecuteError(config.RoutesHandlersInfo.AuthEmployee.TemplateName, err)
 			http.Redirect(
