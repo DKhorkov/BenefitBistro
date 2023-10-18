@@ -114,13 +114,13 @@ func TestSaveEmployeeToken(test *testing.T) {
 	defer deleteTestDatabase(test)
 
 	// Can not save token if user does not exist
-	err := db_adapter.SaveEmployeeToken(testdata.Username, testdata.Token)
+	err := db_adapter.SaveEmployeeToken(testdata.Username, testdata.EmployeeToken)
 	assert.False(test, err == nil)
 
 	err = db_adapter.SaveEmployee(testdata.Username, testdata.Password)
 	assert.True(test, err == nil)
 
-	err = db_adapter.SaveEmployeeToken(testdata.Username, testdata.Token)
+	err = db_adapter.SaveEmployeeToken(testdata.Username, testdata.EmployeeToken)
 	assert.True(test, err == nil)
 }
 
@@ -135,10 +135,85 @@ func TestCompareEmployeeAuthData(test *testing.T) {
 
 	err = db_adapter.SaveEmployee(testdata.Username, testdata.Password)
 	assert.True(test, err == nil)
+
+	accodrs, err = db_adapter.CompareEmployeeAuthData(testdata.Username, testdata.InvalidPassword)
+	assert.False(test, err == nil)
+	assert.False(test, accodrs == true)
 	
 	accodrs, err = db_adapter.CompareEmployeeAuthData(testdata.Username, testdata.Password)
 	assert.True(test, err == nil)
 	assert.True(test, accodrs == true)
+}
+
+func TestGetTableName(test *testing.T) {
+	db_adapter := prepareTestDatabase(test)
+	defer deleteTestDatabase(test)
+
+	table_name, err := db_adapter.getTableName(&db_models.EmployeeUsers{})
+	assert.True(test, err == nil)
+	assert.True(test, table_name == testdata.TableName)
+}
+
+func TestValidateEmployeeToken(test *testing.T) {
+	db_adapter := prepareTestDatabase(test)
+	defer deleteTestDatabase(test)
+
+	// Can't validate token if it doesn't exist
+	user, err := db_adapter.ValidateEmployeeToken(testdata.EmployeeToken)
+	assert.False(test, err == nil)
+	assert.True(test, user.ID == 0)
+	assert.True(test, user.Username == "")
+
+	err = db_adapter.SaveEmployee(testdata.Username, testdata.Password)
+	assert.True(test, err == nil)
+
+	err = db_adapter.SaveEmployeeToken(testdata.Username, testdata.EmployeeToken)
+	assert.True(test, err == nil)
+
+	user, err = db_adapter.ValidateEmployeeToken(testdata.EmployeeToken)
+	assert.True(test, err == nil)
+	assert.True(test, user.ID == 1)
+	assert.True(test, user.Username == testdata.Username)
+}
+
+func TestDeleteEmployeeToken(test *testing.T) {
+	db_adapter := prepareTestDatabase(test)
+	defer deleteTestDatabase(test)
+
+	err := db_adapter.SaveEmployee(testdata.Username, testdata.Password)
+	assert.True(test, err == nil)
+
+	err = db_adapter.SaveEmployeeToken(testdata.Username, testdata.EmployeeToken)
+	assert.True(test, err == nil)
+
+	db_adapter = prepareTestDatabase(test)
+
+	created_token := &db_models.EmployeeTokens{}
+	db_adapter.db.Where(&db_models.EmployeeTokens{Token: testdata.EmployeeToken}).First(created_token)
+	assert.True(test, created_token.ID == 1)
+	assert.True(test, created_token.UserID == 1)
+
+	err = db_adapter.deleteEmployeeToken(testdata.EmployeeToken)
+	assert.True(test, err == nil)
+
+	deleted_token := &db_models.EmployeeTokens{}
+	db_adapter.db.Where(&db_models.EmployeeTokens{Token: testdata.EmployeeToken}).First(deleted_token)
+	assert.True(test, deleted_token.ID == 0)
+	assert.True(test, deleted_token.UserID == 0)
+}
+
+func TestDeleteToken(test *testing.T) {
+	db_adapter := prepareTestDatabase(test)
+	defer deleteTestDatabase(test)
+
+	err := db_adapter.DeleteToken(testdata.EmployeeToken)
+	assert.True(test, err == nil)
+
+	err = db_adapter.DeleteToken(testdata.HirerToken)
+	assert.True(test, err == nil)
+
+	err = db_adapter.DeleteToken("some_faik_token")
+	assert.False(test, err == nil)
 }
 
 func prepareTestDatabase(test *testing.T) DatabaseAdapter {

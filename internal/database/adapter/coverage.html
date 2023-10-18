@@ -1,0 +1,413 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>db_adapter: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">db_adapter/adapter.go (70.1%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package db_adapter
+
+import (
+        "errors"
+        "fmt"
+        "reflect"
+        "strings"
+        "time"
+
+        "gorm.io/driver/sqlite"
+        "gorm.io/gorm"
+
+        "config"
+        "db_models"
+        "logging"
+        "paths_and_folders"
+)
+
+
+type DatabaseAdapter struct {
+        db *gorm.DB
+        DatabaseFolder, DatabaseName string
+}
+
+func (db_adapter *DatabaseAdapter) openConnection() error <span class="cov8" title="1">{
+        db_folder := db_adapter.getDatabaseFolder()
+        err := paths_and_folders.CreateFolderIfNotExists(db_folder)
+        if err != nil </span><span class="cov0" title="0">{
+                logging.Log.Printf("Failed to MakeAllFolders %s: %v", config.DatabaseFolder, err)
+                panic(err)</span>
+        }
+
+        <span class="cov8" title="1">db_name := db_adapter.getDatabaseName()
+        db_adapter.db, err = gorm.Open(sqlite.Open(db_name), &amp;gorm.Config{})
+
+        if err != nil </span><span class="cov0" title="0">{
+                logging.Log.Printf("Error during trying to connect to database: %v", err)
+                return err
+        }</span>
+
+        <span class="cov8" title="1">err = db_adapter.createTablesIfNotExists()
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (db_adapter *DatabaseAdapter) getDatabaseFolder() string <span class="cov8" title="1">{
+        var db_folder string
+        if db_adapter.DatabaseFolder == "" </span><span class="cov8" title="1">{
+                db_folder = config.DatabaseFolder
+        }</span> else<span class="cov8" title="1"> {
+                db_folder = db_adapter.DatabaseFolder
+        }</span>
+
+        <span class="cov8" title="1">return db_folder</span>
+}
+
+func (db_adapter *DatabaseAdapter) getDatabaseName() string <span class="cov8" title="1">{
+        var db_name string
+        if db_adapter.DatabaseName == "" </span><span class="cov8" title="1">{
+                db_name = config.DatabaseName
+        }</span> else<span class="cov8" title="1"> {
+                db_name = db_adapter.DatabaseName
+        }</span>
+
+        <span class="cov8" title="1">return db_name</span>
+}
+
+func (db_adapter *DatabaseAdapter) closeConnection() error <span class="cov8" title="1">{
+        dbInstance, err := db_adapter.db.DB()
+
+        if err != nil </span><span class="cov0" title="0">{
+                logging.Log.Printf("Failed to create instanse for closing DB : %v", err)
+                return err
+        }</span>
+
+        <span class="cov8" title="1">err = dbInstance.Close()
+
+        if err != nil </span><span class="cov0" title="0">{
+                logging.Log.Printf("Failed to close DB : %v", err)
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (db_adapter *DatabaseAdapter) createTablesIfNotExists() error <span class="cov8" title="1">{
+        // Список всех таблиц, чтобы создать их итеративно:
+        tables := []interface{} {
+                &amp;db_models.EmployeeUsers{}, 
+                &amp;db_models.HirerUsers{},
+                &amp;db_models.EmployeeTokens{},
+        }
+
+        for _, table := range tables </span><span class="cov8" title="1">{
+                err := db_adapter.createTableIfNotExists(table)
+                if err != nil </span><span class="cov0" title="0">{
+                        return err
+                }</span>
+        }
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (db_adapter *DatabaseAdapter) createTableIfNotExists(table interface{}) error <span class="cov8" title="1">{
+        if !db_adapter.db.Migrator().HasTable(table) </span><span class="cov8" title="1">{
+                err := db_adapter.db.Migrator().CreateTable(table)
+                if err != nil </span><span class="cov0" title="0">{
+                        logging.Log.Printf(
+                                "Failed to create table \"%v\" : %v", 
+                                reflect.TypeOf(table).String(),
+                                err)
+                        return err
+                }</span>
+        }
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (db_adapter *DatabaseAdapter) SaveEmployee(username, password string) error <span class="cov8" title="1">{
+        // TODO подумать над делегатом для открытия соединения
+        if err := db_adapter.openConnection(); err != nil </span><span class="cov0" title="0">{
+                logging.Log.Printf("Failed to save Employee via problems with database connecton: %v\n", err)
+                return err
+        }</span>
+
+        <span class="cov8" title="1">defer db_adapter.closeConnection()
+
+        if _, err := db_adapter.findUserByUsername(username); err == nil </span><span class="cov8" title="1">{
+                logging.Log.Printf("User with username=%s already exists\n", username)
+                return gorm.ErrRegistered
+        }</span>
+
+        <span class="cov8" title="1">if err := db_adapter.db.Create(
+                &amp;db_models.EmployeeUsers{
+                        Username: username,
+                        Password: password,
+                }).Error; err != nil </span><span class="cov0" title="0">{
+                        logging.Log.Printf("Failed to save EmployeeUser : %v", err)
+                        return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (db_adapter *DatabaseAdapter) SaveEmployeeToken(username, token string) error <span class="cov8" title="1">{
+        if err := db_adapter.openConnection(); err != nil </span><span class="cov0" title="0">{
+                logging.Log.Printf("Failed to save Token via problems with database connecton: %v\n", err)
+                return err
+        }</span>
+
+        <span class="cov8" title="1">defer db_adapter.closeConnection()
+
+        user , err := db_adapter.findUserByUsername(username)
+        if err != nil </span><span class="cov8" title="1">{
+                return err
+        }</span>
+
+        <span class="cov8" title="1">if err := db_adapter.db.Create(
+                &amp;db_models.EmployeeTokens{
+                        Token: token,
+                        Expires: time.Now().Local().Add(config.Token.ExpiresDuration),
+                        UserID: int(user.ID),
+                }).Error; err != nil </span><span class="cov0" title="0">{
+                        logging.Log.Printf("Failed to save EmployeeToken : %v", err)
+                        return err
+                }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (db_adapter *DatabaseAdapter) CompareEmployeeAuthData(username, password string) (bool, error) <span class="cov8" title="1">{
+        if err := db_adapter.openConnection(); err != nil </span><span class="cov0" title="0">{
+                logging.Log.Printf("Failed to compare EmployeeAuthData via problems with database connecton: %v\n", err)
+                return false, err
+        }</span>
+
+        <span class="cov8" title="1">defer db_adapter.closeConnection()
+
+        user, err := db_adapter.findUserByUsername(username)
+        if err != nil </span><span class="cov8" title="1">{
+                return false, err
+        }</span>
+
+        <span class="cov8" title="1">if user.Password != password </span><span class="cov8" title="1">{
+                logging.Log.Printf("Incorrect password \"%v\" for username \"%v\"\n", password, username)
+                return false, errors.New("incorrect password")
+        }</span>
+
+        <span class="cov8" title="1">return true, nil</span>
+}
+
+func (db_adapter *DatabaseAdapter) findUserByUsername(username string) (*db_models.EmployeeUsers, error) <span class="cov8" title="1">{
+        user := &amp;db_models.EmployeeUsers{Username: username}
+        if err := db_adapter.db.Where(user).First(user).Error; err != nil </span><span class="cov8" title="1">{
+                logging.Log.Printf("Failed to find user with username=%v. Error:%v\n", username, err)
+                return user, err
+        }</span>
+
+        <span class="cov8" title="1">return user, nil</span>
+}
+
+func (db_adapter *DatabaseAdapter) ValidateEmployeeToken(token string) (*db_models.EmployeeUsers, error) <span class="cov8" title="1">{
+        user := &amp;db_models.EmployeeUsers{}
+        token_to_find := &amp;db_models.EmployeeTokens{Token: token}
+
+        if err := db_adapter.openConnection(); err != nil </span><span class="cov0" title="0">{
+                logging.Log.Printf("Failed to compare EmployeeAuthData via problems with database connecton: %v\n", err)
+                return user, err
+        }</span>
+
+        <span class="cov8" title="1">defer db_adapter.closeConnection()
+
+        if err := db_adapter.db.Where(token_to_find).First(token_to_find).Error; err != nil </span><span class="cov8" title="1">{
+                logging.Log.Printf("Failed to find token=%v. Error:%v\n", token, err)
+                return user, err
+        }</span>
+        
+        <span class="cov8" title="1">if time.Now().After(token_to_find.Expires) </span><span class="cov0" title="0">{
+                logging.Log.Printf("Token=%v has Expired\n", token)
+                db_adapter.deleteEmployeeToken(token)
+                return user, errors.New("token expired")
+        }</span>
+
+        <span class="cov8" title="1">employee_users_table_name, err := db_adapter.getTableName(&amp;db_models.EmployeeUsers{})
+        if err != nil </span><span class="cov0" title="0">{
+                return user, err
+        }</span>
+
+        <span class="cov8" title="1">employee_tokens_table_name, err := db_adapter.getTableName(&amp;db_models.EmployeeTokens{})
+        if err != nil </span><span class="cov0" title="0">{
+                return user, err
+        }</span>
+
+        <span class="cov8" title="1">join_stmt := fmt.Sprintf(
+                "JOIN %v ON %v.user_id = %v.id WHERE %v.id = %v", 
+                employee_tokens_table_name, 
+                employee_tokens_table_name, 
+                employee_users_table_name,
+                employee_users_table_name,
+                token_to_find.UserID,
+        )
+
+        if err := db_adapter.db.Table(employee_users_table_name).Select("*").Joins(join_stmt).Scan(user).Error; err != nil </span><span class="cov0" title="0">{
+                logging.Log.Printf("Failed to find user for token=%v. Error:%v\n", token, err)
+                return user, err
+        }</span>
+
+        <span class="cov8" title="1">return user, nil</span>
+}
+
+func (db_adapter *DatabaseAdapter) ValidateHirerToken(token string) (*db_models.HirerUsers, error) <span class="cov0" title="0">{
+        return &amp;db_models.HirerUsers{}, nil
+
+        // TODO write test for this method
+}</span>
+
+func (db_adapter *DatabaseAdapter) getTableName(model interface{}) (string, error) <span class="cov8" title="1">{
+        stmt := &amp;gorm.Statement{DB: db_adapter.db}
+        if err := stmt.Parse(model); err != nil </span><span class="cov0" title="0">{
+                logging.Log.Printf("Failed to find Table name for model=%v\n", model)
+                return "", err
+        }</span>
+
+        <span class="cov8" title="1">tableName := stmt.Schema.Table
+        return tableName, nil</span>
+}
+
+func (db_adapter *DatabaseAdapter) DeleteToken(token string) error <span class="cov8" title="1">{
+        if strings.HasPrefix(token, config.Token.EmployeePrefix) </span><span class="cov8" title="1">{
+                return db_adapter.deleteEmployeeToken(token)
+        }</span> else<span class="cov8" title="1"> if strings.HasPrefix(token, config.Token.HirerPrefix) </span><span class="cov8" title="1">{
+                return db_adapter.deleteHirerToken(token)
+        }</span> else<span class="cov8" title="1"> {
+                error_message := fmt.Sprintf("invalid token for delete with unknown prefix: %v\n", token)
+                return errors.New(error_message)
+        }</span>
+}
+
+func (db_adapter *DatabaseAdapter) deleteEmployeeToken(token string) error <span class="cov8" title="1">{
+        if err := db_adapter.openConnection(); err != nil </span><span class="cov0" title="0">{
+                logging.Log.Printf("Failed to compare EmployeeAuthData via problems with database connecton: %v\n", err)
+                return err
+        }</span>
+
+        <span class="cov8" title="1">defer db_adapter.closeConnection()
+
+        token_to_delete := &amp;db_models.EmployeeTokens{Token: token}
+        if err := db_adapter.db.Where(token_to_delete).Delete(token_to_delete).Error; err != nil </span><span class="cov0" title="0">{
+                logging.Log.Printf("Failed to delete token=%v. Error: %v\n", token, err)
+                return err
+        }</span>
+
+        <span class="cov8" title="1">return nil</span>
+}
+
+func (db_adapter *DatabaseAdapter) deleteHirerToken(token string) error <span class="cov8" title="1">{
+        if err := db_adapter.openConnection(); err != nil </span><span class="cov0" title="0">{
+                logging.Log.Printf("Failed to compare EmployeeAuthData via problems with database connecton: %v\n", err)
+                return err
+        }</span>
+
+        <span class="cov8" title="1">defer db_adapter.closeConnection()
+
+        // TODO write test for this method
+
+        return nil</span>
+}
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

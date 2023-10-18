@@ -253,6 +253,8 @@ func (db_adapter *DatabaseAdapter) ValidateEmployeeToken(token string) (*db_mode
 
 func (db_adapter *DatabaseAdapter) ValidateHirerToken(token string) (*db_models.HirerUsers, error) {
 	return &db_models.HirerUsers{}, nil
+
+	// TODO write test for this method
 }
 
 func (db_adapter *DatabaseAdapter) getTableName(model interface{}) (string, error) {
@@ -269,8 +271,11 @@ func (db_adapter *DatabaseAdapter) getTableName(model interface{}) (string, erro
 func (db_adapter *DatabaseAdapter) DeleteToken(token string) error {
 	if strings.HasPrefix(token, config.Token.EmployeePrefix) {
 		return db_adapter.deleteEmployeeToken(token)
-	} else {
+	} else if strings.HasPrefix(token, config.Token.HirerPrefix) {
 		return db_adapter.deleteHirerToken(token)
+	} else {
+		error_message := fmt.Sprintf("invalid token for delete with unknown prefix: %v\n", token)
+		return errors.New(error_message)
 	}
 }
 
@@ -298,6 +303,8 @@ func (db_adapter *DatabaseAdapter) deleteHirerToken(token string) error {
 	}
 
 	defer db_adapter.closeConnection()
+
+	// TODO write test for this method
 
 	return nil
 }
