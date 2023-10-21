@@ -37,12 +37,14 @@ func AuthHandlerDelegat(
 				user_data.Username = ""
 				user_data.Authentificated = false
 			} else {
-				err := auth.ProcessTokenValidation(
+				db_adapter := db_adapter.DatabaseAdapter{}
+				err := auth.ValidateToken(
 					token, 
 					need_to_redirect, 
 					&user_data, 
 					response, 
-					request)
+					request, 
+					db_adapter)
 
 				if err != nil {
 					logging.Log.Printf("Error during AuthDelegat: %v\n", err)

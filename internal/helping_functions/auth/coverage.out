@@ -1,0 +1,15 @@
+mode: set
+auth/auth.go:21.47,23.60 1 1
+auth/auth.go:23.60,33.4 2 1
+auth/auth.go:33.9,33.64 1 1
+auth/auth.go:33.64,43.4 2 1
+auth/auth.go:43.9,45.4 1 1
+auth/auth.go:55.31,57.37 1 1
+auth/auth.go:57.37,60.4 2 1
+auth/auth.go:60.9,60.24 1 1
+auth/auth.go:60.24,64.4 3 1
+auth/auth.go:64.9,67.4 2 1
+auth/auth.go:69.3,69.13 1 1
+auth/auth.go:72.60,74.16 2 1
+auth/auth.go:74.16,76.3 1 1
+auth/auth.go:78.2,79.19 2 1

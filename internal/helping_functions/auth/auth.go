@@ -5,24 +5,24 @@ import (
 	"logging"
 	"net/http"
 	"strings"
-	"structures"
 
 	"config"
 	"db_adapter"
+	"structures"
 )
 
 
-func ProcessTokenValidation(
+func ValidateToken(
 	token string, 
 	need_to_redirect bool,
 	user_data *structures.UserDataStructure, 
 	response http.ResponseWriter, 
-	request *http.Request) error {
+	request *http.Request,
+	db_adapter db_adapter.DatabaseAdapter) error {
 
-		db_adapter := db_adapter.DatabaseAdapter{}
 		if strings.HasPrefix(token, config.Token.EmployeePrefix) {
 			user, err := db_adapter.ValidateEmployeeToken(token)
-			return checkIfTokenIsValid(
+			return processTokenValidation(
 				err, 
 				need_to_redirect, 
 				user_data, 
@@ -30,9 +30,9 @@ func ProcessTokenValidation(
 				config.RoutesHandlersInfo.EmployeeLogin.URLPath, 
 				response, 
 				request)
-		} else {
+		} else if strings.HasPrefix(token, config.Token.HirerPrefix) {
 			user, err := db_adapter.ValidateHirerToken(token)
-			return checkIfTokenIsValid(
+			return processTokenValidation(
 				err, 
 				need_to_redirect, 
 				user_data, 
@@ -40,10 +40,12 @@ func ProcessTokenValidation(
 				config.RoutesHandlersInfo.HirerLogin.URLPath, 
 				response, 
 				request)
+		} else {
+			return fmt.Errorf("invalid prefix for token: %v", token)
 		}
 }
 
-func checkIfTokenIsValid(
+func processTokenValidation(
 	err error,
 	need_to_redirect bool,
 	user_data *structures.UserDataStructure,
@@ -55,7 +57,6 @@ func checkIfTokenIsValid(
 		if err != nil && need_to_redirect {
 			logging.Log.Printf("Error during AuthDelegat: %v\n", err)
 			http.Redirect(response, request, redirectURL, http.StatusSeeOther)
-			return err
 		} else if err != nil {
 			logging.Log.Printf("Error during AuthDelegat: %v\n", err)
 			user_data.Username = ""
@@ -65,7 +66,7 @@ func checkIfTokenIsValid(
 			user_data.Authentificated = true
 		}
 		
-		return nil
+		return err
 }
 
 func GetAccessToken(request *http.Request) (string, error) {
